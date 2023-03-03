@@ -1,0 +1,172 @@
+<aura:component
+    implements="force:appHostable,flexipage:availableForAllPageTypes,flexipage:availableForRecordHome,force:hasRecordId,forceCommunity:availableForAllPageTypes,force:lightningQuickAction"
+    controller="NewCustomUploadController" access="global">
+
+    <aura:attribute name="isModalOpen" type="boolean" default="false" />
+    <aura:attribute name="recordId" type="Id" />
+    <aura:attribute name="accept" type="List"
+        default="['.rar','.jpg', '.jpeg', '.pdf', '.zip','.avi','.docx','.exe','.html','.htt','.mov','.mp3','.mp4','.mpeg','.ppt','.pptx','.png','.svg','.thtml','txml','.wav','.wma','.wmv','.xls','.xlsx','.xml','.tar']" />
+    <aura:attribute name="categorydetails" type="List" />
+    <aura:attribute name="subdetails" type="List" />
+    <aura:attribute name="subdetailsList" type="List" />
+    <aura:attribute name="subselect" type="boolean" default="false" />
+    <aura:attribute name="contentid" type="id" />
+    <aura:attribute name="showfilterSubData" type="boolean" default="false" />
+    <aura:attribute name="showAllFiles" type="boolean" default="false" />
+    <aura:attribute name="showFiels" type="boolean" default="false" />
+    <aura:attribute name="hideFiels" type="boolean" default="true" />
+    <aura:attribute name="updatedetails" type="List" />
+    <aura:attribute name="uploadopen" type="boolean" default="false" />
+    <aura:attribute name="fileUploadDisabledFlag" type="boolean" default="true" />
+    <aura:attribute name="showFileUploadCard" type="boolean" default="true" />
+    <aura:attribute name="fieldName" type="string" />
+    <aura:attribute name="searchedValue" type="string" />
+    <aura:attribute name="refno" type="string" />
+    <aura:attribute type="String[]" name="listURLs" />
+    <aura:attribute name="prefixURL" type="String" default="/sfc/servlet.shepherd/version/download/" />
+
+    <aura:registerEvent name="closeModal" type="c:closeModal" />
+    <!--Declare Attributes-->
+
+    <aura:handler name="init" value="{!this}" action="{!c.init}" />
+    <aura:if isTrue="{!v.showFileUploadCard}">
+
+        <article class="slds-card">
+            <div class="slds-card__header slds-grid">
+                <header class="slds-media slds-media_center slds-has-flexi-truncate">
+                    <div class="slds-media__figure">
+
+                        <div class="slds-media__figure">
+                            <aura:if isTrue="{!v.hideFiels}">
+                                <lightning:icon iconName="utility:chevronright" onclick="{!c.showAllFies}"
+                                    style="cursor:pointer" size="small" />
+                                <aura:set attribute="else">
+                                    <lightning:icon iconName="utility:chevrondown" onclick="{!c.hideAllFies}"
+                                        style="cursor:pointer" size="small" />
+                                </aura:set>
+                            </aura:if>
+                        </div>
+                    </div>
+                    <div class="slds-media__body">
+                        <span class="slds-icon_container slds-icon-standard-contact">
+                            <lightning:icon iconName="standard:file" size="small" />
+                        </span>
+                        <strong> Upload Files </strong>
+                    </div>
+                    <div class="slds-no-flex">
+                        <lightning:button variant="brand-outline" label="Add files" title="Add Files"
+                            onclick="{! c.openModel }" />
+                    </div>
+                </header>
+            </div>
+            <div class="slds-card__body slds-card__body_inner">
+                <aura:if isTrue="{!v.showAllFiles}">
+                    <aura:iteration items="{! v.listURLs }" var="imgStr">
+                        <lightning:button variant="base" class="slds-truncate" label="{!imgStr.Title}"
+                            title="{!imgStr.ContentDocumentId}" onclick="{! c.onPictureClick }" />
+                    </aura:iteration>
+                </aura:if>
+            </div>
+        </article>
+
+    </aura:if>
+    <div class="slds-m-around_xx-large">
+        <aura:if isTrue="{!v.isModalOpen}">
+            <section role="dialog" tabindex="-1" aria-labelledby="modal-heading-01" aria-modal="true"
+                aria-describedby="modal-content-id-1" class="slds-modal slds-fade-in-open slds-modal_medium">
+                <div class="slds-modal__container">
+
+                    <header class="slds-modal__header">
+                        <lightning:buttonIcon iconName="utility:close" onclick="{! c.closeModel }"
+                            alternativeText="close" variant="bare-inverse" class="slds-modal__close" />
+                        <h2 id="modal-heading-01" class="slds-text-heading_medium slds-hyphenate">Upload Files</h2>
+                    </header>
+
+                    <div class="slds-modal__content slds-p-around_medium" id="modal-content-id-1" style="height:10rem;">
+                        <div class="slds-grid slds-gutters">
+                            <div class="slds-border_right slds-col">
+                                <lightning:verticalNavigation>
+                                    <lightning:fileUpload multiple="{!v.multiple}" accept="{!v.accept}"
+                                        recordId="{!v.recordId}" onuploadfinished="{!c.handleUploadFinished}"
+                                        disabled="{!v.fileUploadDisabledFlag}" />
+                                </lightning:verticalNavigation>
+                            </div>
+                            <div class="slds-col">
+                                <div class="slds-grid slds-gutters">
+                                    <div class="slds-col">
+                                        <lightning:select name="VendorId" label="Category" required="true"
+                                            aura:id="assigned" onchange="{!c.onCatagoryChange}"
+                                            messageWhenValueMissing="Select a valid value">
+                                            <option label="Select Category"></option>
+                                            <aura:iteration items="{!v.categorydetails}" var="item">
+                                                <option label="{!item.Label}" text="{!item.Label}"></option>
+                                            </aura:iteration>
+                                        </lightning:select>
+                                    </div>
+                                    <div class="slds-col">
+                                        <aura:if isTrue="{!v.subselect}">
+                                            <div class="slds-form-element">
+                                                <div class="slds-form-element__control">
+                                                    <div class="slds-combobox_container">
+                                                        <div
+                                                            class="slds-combobox slds-dropdown-trigger slds-dropdown-trigger_click slds-is-open">
+                                                            <div class="slds-combobox__form-element slds-input-has-icon slds-input-has-icon_right"
+                                                                role="none">
+                                                                <lightning:input type="text" label="Sub-Category"
+                                                                    placeholder="Search... " value="{!v.searchedValue}"
+                                                                    onclick="{!c.handleSubCategoryClick}"
+                                                                    onchange="{!c.existingSearchSubCategory}">
+                                                                </lightning:input>
+                                                            </div>
+                                                            <!--Start Existing value list section -->
+                                                            <aura:if isTrue="{!!empty(v.subdetailsList)}">
+                                                                <div id="listbox-id-4"
+                                                                    class="slds-dropdown slds-dropdown_length-with-icon-7 slds-dropdown_fluid"
+                                                                    role="listbox">
+                                                                    <ul class="slds-listbox slds-listbox_vertical"
+                                                                        role="presentation">
+                                                                        <aura:iteration items="{!v.subdetailsList}"
+                                                                            var="item">
+                                                                            <li role="presentation"
+                                                                                class="slds-listbox__item"
+                                                                                name="{!item.Name__c}"
+                                                                                onclick="{!c.onSubCategoryChange}">
+                                                                                <div class="slds-media slds-listbox__option slds-listbox__option_entity slds-listbox__option_has-meta"
+                                                                                    role="option">
+                                                                                    <span class="slds-media__body"
+                                                                                        style="margin: auto;">
+                                                                                        <span
+                                                                                            class="slds-listbox__option-text slds-listbox__option-text_entity">
+                                                                                            <span>
+                                                                                                {!item.Name__c}</span>
+                                                                                        </span>
+                                                                                    </span>
+                                                                                </div>
+                                                                            </li>
+                                                                        </aura:iteration>
+                                                                    </ul>
+                                                                </div>
+                                                            </aura:if>
+                                                            <!--End Existing value list section -->
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </aura:if>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!--Modal/Popup Box Footer Starts here-->
+                    <footer class="slds-modal__footer">
+                        <lightning:button variant="neutral" label="Cancel" title="Cancel" onclick="{! c.closeModel }" />
+                    </footer>
+                </div>
+            </section>
+            <div class="slds-backdrop slds-backdrop_open"></div>
+
+        </aura:if>
+    </div>
+
+</aura:component>

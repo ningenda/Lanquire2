@@ -1,0 +1,16 @@
+.THIS .slds-image__crop img,.THIS .slds-file__crop img{
+        max-width: 100px;
+}
+
+.THIS.slds-image_card,.THIS.slds-image--card,.THIS.slds-file_card,.THIS.slds-file--card{
+    border-top-right-radius: 8px !important;
+    border-top-left-radius: 8px !important;
+    border: 1px solid rgb(0, 0, 0, 0);
+}
+.THIS .slds-card__body .box_sizing {
+display: inline-block !important;
+}
+
+.THIS.slds-box {
+    padding: 0px !important;
+}

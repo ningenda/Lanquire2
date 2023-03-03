@@ -1,0 +1,3 @@
+<design:component>
+    <design:attribute Name="refno" description="Enter the field you want as reference number in this field"/>
+</design:component>
